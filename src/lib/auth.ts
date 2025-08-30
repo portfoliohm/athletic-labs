@@ -1,0 +1,150 @@
+/**
+ * Athletic Labs - Authentication Utilities
+ * 
+ * Handles user authentication, session management, and role-based access
+ */
+
+import { supabase } from './supabase';
+import type { User } from '@supabase/supabase-js';
+import type { Database } from './supabase';
+
+export type Profile = Database['public']['Tables']['profiles']['Row'];
+export type UserRole = 'team_staff' | 'admin';
+
+export interface AuthUser extends User {
+  profile?: Profile;
+}
+
+/**
+ * Get current user session and profile
+ */
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+      return null;
+    }
+
+    // Fetch user profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    return {
+      ...user,
+      profile: profile || undefined
+    };
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+}
+
+/**
+ * Sign in with email and password
+ */
+export async function signIn(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+/**
+ * Sign out current user
+ */
+export async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+/**
+ * Check if user has specific role
+ */
+export function hasRole(user: AuthUser | null, role: UserRole): boolean {
+  return user?.profile?.role === role;
+}
+
+/**
+ * Check if user is admin
+ */
+export function isAdmin(user: AuthUser | null): boolean {
+  return hasRole(user, 'admin');
+}
+
+/**
+ * Check if user is team staff
+ */
+export function isTeamStaff(user: AuthUser | null): boolean {
+  return hasRole(user, 'team_staff');
+}
+
+/**
+ * Check if user belongs to specific team
+ */
+export function belongsToTeam(user: AuthUser | null, teamId: string): boolean {
+  return user?.profile?.team_id === teamId;
+}
+
+/**
+ * Get user's team ID
+ */
+export function getUserTeamId(user: AuthUser | null): string | null {
+  return user?.profile?.team_id || null;
+}
+
+/**
+ * Create user profile after signup
+ */
+export async function createProfile(
+  userId: string,
+  profileData: Omit<Database['public']['Tables']['profiles']['Insert'], 'id'>
+) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .insert({
+      id: userId,
+      ...profileData
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+/**
+ * Update user profile
+ */
+export async function updateProfile(
+  userId: string,
+  updates: Database['public']['Tables']['profiles']['Update']
+) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
