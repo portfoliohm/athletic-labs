@@ -52,13 +52,23 @@ export function useAuth() {
     };
   }, []);
 
+  const isAdmin = user?.profile?.role === 'admin';
+  const isTeamStaff = user?.profile?.role === 'team_staff';
+  
+  // Debug logging
+  if (user) {
+    console.log("useAuth - user profile:", user.profile);
+    console.log("useAuth - isAdmin:", isAdmin);
+    console.log("useAuth - isTeamStaff:", isTeamStaff);
+  }
+
   return {
     user,
     loading,
     error,
     isAuthenticated: !!user,
-    isAdmin: user?.profile?.role === 'admin',
-    isTeamStaff: user?.profile?.role === 'team_staff',
+    isAdmin,
+    isTeamStaff,
     teamId: user?.profile?.team_id || null
   };
 }

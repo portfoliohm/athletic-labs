@@ -43,6 +43,11 @@ export function AppNavigation() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Debug logging
+  console.log("AppNavigation - user:", user);
+  console.log("AppNavigation - isAdmin:", isAdmin);
+  console.log("AppNavigation - isTeamStaff:", isTeamStaff);
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -57,6 +62,8 @@ export function AppNavigation() {
     if (isTeamStaff) return item.roles.includes("team_staff");
     return false;
   });
+
+  console.log("Filtered navigation items:", filteredItems.length, filteredItems.map(i => i.label));
 
   const NavItem = ({ item, mobile = false }: { item: typeof navigationItems[0], mobile?: boolean }) => {
     const isActive = pathname === item.href;

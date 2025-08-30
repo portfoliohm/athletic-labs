@@ -27,11 +27,15 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     }
 
     // Fetch user profile
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
+
+    console.log("getCurrentUser - user id:", user.id);
+    console.log("getCurrentUser - profile data:", profile);
+    console.log("getCurrentUser - profile error:", profileError);
 
     return {
       ...user,
