@@ -178,7 +178,7 @@ CREATE POLICY "Team staff can view team settings" ON team_settings FOR SELECT US
 CREATE OR REPLACE FUNCTION generate_order_number()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.order_number := 'AL' || TO_CHAR(NOW(), 'YYYYMMDD') || LPAD(NEXTVAL('order_sequence'), 4, '0');
+  NEW.order_number := 'AL' || TO_CHAR(NOW(), 'YYYYMMDD') || LPAD(NEXTVAL('order_sequence')::text, 4, '0');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
