@@ -25,15 +25,6 @@ export default function Home() {
               <Link href="/request-access">Request Access</Link>
             </Button>
           </div>
-          
-          <div className="flex gap-4 justify-center mt-6">
-            <Button asChild variant="secondary" size="sm">
-              <Link href="/demo/team-staff">View Team Demo</Link>
-            </Button>
-            <Button asChild variant="secondary" size="sm">
-              <Link href="/demo/admin">View Admin Demo</Link>
-            </Button>
-          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
