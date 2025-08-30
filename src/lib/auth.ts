@@ -20,26 +20,33 @@ export interface AuthUser extends User {
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
   try {
+    console.log('getCurrentUser: Starting...');
+    
     const { data: { user }, error } = await supabase.auth.getUser();
     
+    console.log('getCurrentUser: Auth user result:', user ? 'FOUND' : 'NOT FOUND', error);
+    
     if (error || !user) {
+      console.log('getCurrentUser: No user or error:', error?.message);
       return null;
     }
 
     // Fetch user profile
+    console.log('getCurrentUser: Fetching profile for user:', user.id);
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
 
+    console.log('getCurrentUser: Profile result:', profile, 'Error:', profileError);
 
     return {
       ...user,
       profile: profile || undefined
     };
   } catch (error) {
-    console.error('Error getting current user:', error);
+    console.error('getCurrentUser: Caught error:', error);
     return null;
   }
 }

@@ -14,9 +14,30 @@ export function useAuth() {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
+        console.log('useAuth: Getting initial session...');
+        
+        // First check if there's an active session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('useAuth: Session check:', session ? 'FOUND' : 'NOT FOUND', sessionError);
+        
+        if (sessionError) {
+          console.error('useAuth: Session error:', sessionError);
+          setError(sessionError.message);
+          setLoading(false);
+          return;
+        }
+        
+        if (session?.user) {
+          console.log('useAuth: Session user found, getting profile...');
+          const currentUser = await getCurrentUser();
+          console.log('useAuth: Current user:', currentUser);
+          setUser(currentUser);
+        } else {
+          console.log('useAuth: No active session');
+          setUser(null);
+        }
       } catch (err) {
+        console.error('useAuth: Error in getInitialSession:', err);
         setError(err instanceof Error ? err.message : 'Authentication error');
       } finally {
         setLoading(false);
