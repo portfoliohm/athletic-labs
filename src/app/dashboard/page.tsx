@@ -26,7 +26,7 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
-  const { user, isAdmin, isTeamStaff } = useAuth();
+  const { user, isAdmin, isTeamStaff, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     activeOrders: 0,
     monthlySpend: 0,
@@ -38,6 +38,33 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchDashboardStats();
   }, [user, isAdmin]);
+
+  // Debug: Show auth state before redirecting
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Debug: Show what's happening with auth
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center p-8 border rounded-lg">
+          <h2 className="text-xl font-bold mb-4">Authentication Debug</h2>
+          <p className="mb-2">User: {user ? 'FOUND' : 'NOT FOUND'}</p>
+          <p className="mb-2">Auth Loading: {authLoading ? 'YES' : 'NO'}</p>
+          <p className="mb-4">This should redirect to login in 3 seconds...</p>
+          <a href="/login" className="text-blue-500 underline">Go to Login</a>
+        </div>
+      </div>
+    );
+  }
 
   const fetchDashboardStats = async () => {
     try {
