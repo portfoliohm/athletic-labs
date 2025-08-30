@@ -1,9 +1,14 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { AppNavigation } from "./AppNavigation";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
+
+// Dynamic import to prevent initialization issues
+const AppNavigation = dynamic(() => import("./AppNavigation").then(mod => ({ default: mod.AppNavigation })), {
+  ssr: false
+});
 
 interface AuthenticatedLayoutProps {
   children: React.ReactNode;
@@ -18,9 +23,6 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
       router.push("/login");
     }
   }, [user, loading, router]);
-
-  // Debug: Add visible indicator
-  console.log("AuthenticatedLayout - user:", user, "loading:", loading);
 
   if (loading) {
     return (
@@ -39,14 +41,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Debug indicator */}
-      <div className="fixed top-0 right-0 bg-red-500 text-white p-2 z-50 text-xs">
-        AuthLayout: {user ? 'LOGGED IN' : 'NO USER'} | Role: {user?.profile?.role || 'NONE'}
-      </div>
-      
       <AppNavigation />
-      
-      {/* Main Content */}
       <div className="lg:pl-64">
         <main className="flex-1">
           {children}
