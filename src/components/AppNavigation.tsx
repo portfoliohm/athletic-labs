@@ -54,11 +54,8 @@ export function AppNavigation() {
     }
   };
 
-  const filteredItems = navigationItems.filter(item => {
-    if (isAdmin) return item.roles.includes("admin");
-    if (isTeamStaff) return item.roles.includes("team_staff");
-    return false;
-  });
+  // DEBUG: Show all items regardless of role
+  const filteredItems = navigationItems;
 
   const NavItem = ({ item, mobile = false }: { item: typeof navigationItems[0], mobile?: boolean }) => {
     const isActive = pathname === item.href;
@@ -87,8 +84,8 @@ export function AppNavigation() {
         Nav: {filteredItems.length} items | Admin: {isAdmin ? 'YES' : 'NO'} | Staff: {isTeamStaff ? 'YES' : 'NO'}
       </div>
       
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:bg-card">
+      {/* Desktop Sidebar - ALWAYS VISIBLE FOR DEBUG */}
+      <div className="flex w-64 flex-col fixed inset-y-0 border-r bg-card z-40">
         <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
           <div className="flex items-center flex-shrink-0 px-4 mb-8">
             <h1 className="text-xl font-bold text-primary">Athletic Labs</h1>
