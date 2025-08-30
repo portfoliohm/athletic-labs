@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -227,24 +228,19 @@ function NewOrderPageContent() {
   const pricing = calculatePricing();
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <AuthenticatedLayout>
+      <div className="p-6">
+        <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-title-large text-primary">New Order</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-3xl font-bold mb-2">New Order</h1>
+            <p className="text-muted-foreground">
               Place a new meal order for your team
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">← Dashboard</Link>
-            </Button>
-          </div>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard">← Dashboard</Link>
+          </Button>
         </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
         {error && (
           <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
             <p className="text-destructive">{error}</p>
@@ -484,8 +480,8 @@ function NewOrderPageContent() {
             </Card>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }
 

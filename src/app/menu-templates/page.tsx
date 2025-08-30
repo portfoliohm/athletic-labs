@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { ShoppingCart } from "@/components/ShoppingCart";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 
 interface MenuTemplate {
   id: string;
@@ -20,12 +25,14 @@ interface MenuTemplate {
   created_at: string;
 }
 
-
 export default function MenuTemplatesPage() {
   const { user, loading: authLoading } = useAuth();
   const [templates, setTemplates] = useState<MenuTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [cuisineFilter, setCuisineFilter] = useState<string>("all");
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -60,58 +67,87 @@ export default function MenuTemplatesPage() {
     }
   };
 
+  const cuisineTypes = [...new Set(templates.map(t => t.cuisine_type))];
+
+  const filteredTemplates = templates.filter(template => {
+    const matchesSearch = 
+      template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.cuisine_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (template.description && template.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesCuisine = 
+      cuisineFilter === "all" || 
+      template.cuisine_type === cuisineFilter;
+
+    return matchesSearch && matchesCuisine;
+  });
+
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading menu templates...</p>
+      <AuthenticatedLayout>
+        <div className="p-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading menu templates...</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-title-large text-primary">Menu Templates</h1>
-            <p className="text-sm text-muted-foreground">
-              Browse available meal bundles for your team
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
-          </div>
+    <AuthenticatedLayout>
+      <div className="p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Menu Templates</h1>
+          <p className="text-muted-foreground">
+            Browse our professionally designed meal bundles for your team
+          </p>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8">
         {error && (
           <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
             <p className="text-destructive">{error}</p>
           </div>
         )}
 
-        <div className="mb-6">
-          <h2 className="text-headline-large mb-2">Available Menu Templates</h2>
-          <p className="text-body-large text-muted-foreground">
-            Choose from our professionally designed meal bundles, each serving {templates[0]?.serves_count || 25} people.
-          </p>
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
+          <div className="flex gap-4">
+            <div className="flex-1 max-w-sm relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search templates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="w-48">
+              <Select value={cuisineFilter} onValueChange={setCuisineFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Cuisines" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Cuisines</SelectItem>
+                  {cuisineTypes.map(cuisine => (
+                    <SelectItem key={cuisine} value={cuisine}>{cuisine}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templates.map((template) => (
+          {filteredTemplates.map((template) => (
             <Card key={template.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-title-large">{template.name}</CardTitle>
+                    <CardTitle className="text-lg">{template.name}</CardTitle>
                     <Badge variant="secondary" className="mt-2">
                       {template.cuisine_type}
                     </Badge>
@@ -127,7 +163,7 @@ export default function MenuTemplatesPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <CardDescription className="text-body-large">
+                <CardDescription>
                   {template.description || "No description available"}
                 </CardDescription>
                 
@@ -160,6 +196,23 @@ export default function MenuTemplatesPage() {
           ))}
         </div>
 
+        {filteredTemplates.length === 0 && templates.length > 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">
+              No templates found matching your criteria
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchTerm("");
+                setCuisineFilter("all");
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        )}
+
         {templates.length === 0 && !loading && (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">
@@ -171,13 +224,14 @@ export default function MenuTemplatesPage() {
           </div>
         )}
 
-        <div className="mt-12 text-center">
+        {/* Custom Templates Section */}
+        <div className="mt-12">
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
-              <CardTitle className="text-title-large">Custom Nutrition Needs?</CardTitle>
+              <CardTitle className="text-lg">Custom Nutrition Needs?</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription className="text-body-large mb-4">
+              <CardDescription className="mb-4">
                 Our team can create custom meal templates tailored to your specific nutritional requirements and team preferences.
               </CardDescription>
               <Button asChild variant="outline">
@@ -188,7 +242,14 @@ export default function MenuTemplatesPage() {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* Shopping Cart */}
+      <ShoppingCart 
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onCheckout={() => router.push('/orders/new')}
+      />
+    </AuthenticatedLayout>
   );
 }

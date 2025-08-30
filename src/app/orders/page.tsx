@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,39 +92,34 @@ export default function OrdersPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading orders...</p>
+      <AuthenticatedLayout>
+        <div className="p-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading orders...</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <AuthenticatedLayout>
+      <div className="p-6">
+        <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-title-large text-primary">Orders</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-3xl font-bold mb-2">Orders</h1>
+            <p className="text-muted-foreground">
               {isAdmin ? "All team orders" : "Your team's orders"}
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button asChild>
-              <Link href="/orders/new">New Order</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
-          </div>
+          <Button asChild>
+            <Link href="/orders/new">New Order</Link>
+          </Button>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8">
         {error && (
           <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
             <p className="text-destructive">{error}</p>
@@ -132,7 +128,7 @@ export default function OrdersPage() {
 
         <div className="mb-6 flex justify-between items-center">
           <div>
-            <h2 className="text-headline-large">Order History</h2>
+            <h2 className="text-2xl font-semibold">Order History</h2>
             <p className="text-muted-foreground">
               {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
             </p>
@@ -242,7 +238,7 @@ export default function OrdersPage() {
             </Button>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }

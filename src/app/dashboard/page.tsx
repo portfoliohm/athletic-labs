@@ -1,96 +1,209 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { signOut } from "@/lib/auth";
-import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { 
+  ShoppingCart, 
+  DollarSign, 
+  TrendingUp,
+  Plus,
+  Eye,
+  BarChart3,
+  Users
+} from "lucide-react";
+
+interface DashboardStats {
+  activeOrders: number;
+  monthlySpend: number;
+  totalTeams: number;
+  recentOrdersCount: number;
+}
 
 export default function DashboardPage() {
-  const { user, loading, isAdmin, isTeamStaff } = useAuth();
-  const router = useRouter();
+  const { user, isAdmin, isTeamStaff } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({
+    activeOrders: 0,
+    monthlySpend: 0,
+    totalTeams: 0,
+    recentOrdersCount: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-  const handleSignOut = async () => {
+  useEffect(() => {
+    fetchDashboardStats();
+  }, [user, isAdmin]);
+
+  const fetchDashboardStats = async () => {
     try {
-      await signOut();
-      router.push("/");
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+
+      // Fetch active orders
+      const { data: activeOrdersData } = await supabase
+        .from('orders')
+        .select('id')
+        .in('status', ['pending', 'confirmed', 'preparing']);
+
+      // Fetch monthly spend
+      const { data: monthlySpendData } = await supabase
+        .from('orders')
+        .select('total_amount')
+        .gte('created_at', `${currentMonth}-01`)
+        .eq('status', 'delivered');
+
+      // Fetch team count (admin only)
+      let totalTeams = 0;
+      if (isAdmin) {
+        const { data: teamsData } = await supabase
+          .from('teams')
+          .select('id');
+        totalTeams = teamsData?.length || 0;
+      }
+
+      // Fetch recent orders count
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const { data: recentOrdersData } = await supabase
+        .from('orders')
+        .select('id')
+        .gte('created_at', oneWeekAgo.toISOString());
+
+      setStats({
+        activeOrders: activeOrdersData?.length || 0,
+        monthlySpend: monthlySpendData?.reduce((sum, order) => sum + order.total_amount, 0) || 0,
+        totalTeams,
+        recentOrdersCount: recentOrdersData?.length || 0
+      });
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("Error fetching dashboard stats:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    router.push("/login");
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-title-large text-primary">Athletic Labs</h1>
-            <p className="text-sm text-muted-foreground">
-              Welcome back, {user.profile?.first_name} {user.profile?.last_name}
-            </p>
-          </div>
-          <Button variant="outline" onClick={handleSignOut}>
-            Sign Out
-          </Button>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
+    <AuthenticatedLayout>
+      <div className="p-6">
         <div className="mb-8">
-          <h2 className="text-headline-large mb-2">Dashboard</h2>
-          <p className="text-body-large text-muted-foreground">
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">
             {isAdmin ? "Athletic Labs Admin Portal" : "Team Nutrition Management"}
           </p>
         </div>
 
+        {/* Analytics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{loading ? "..." : stats.activeOrders}</div>
+              <p className="text-xs text-muted-foreground">
+                Orders in progress
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Monthly Spend</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                ${loading ? "..." : stats.monthlySpend.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                This month&apos;s total
+              </p>
+            </CardContent>
+          </Card>
+
+          {isAdmin && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Teams</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{loading ? "..." : stats.totalTeams}</div>
+                <p className="text-xs text-muted-foreground">
+                  Active team accounts
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{loading ? "..." : stats.recentOrdersCount}</div>
+              <p className="text-xs text-muted-foreground">
+                Orders this week
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Quick Actions */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-title-large">Quick Actions</CardTitle>
+              <CardTitle className="text-lg">Quick Actions</CardTitle>
               <CardDescription>Common tasks and shortcuts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {isTeamStaff && (
                 <>
                   <Button asChild className="w-full justify-start">
-                    <Link href="/orders/new">Place New Order</Link>
+                    <Link href="/orders/new">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Place New Order
+                    </Link>
                   </Button>
                   <Button asChild variant="outline" className="w-full justify-start">
-                    <Link href="/orders">View Orders</Link>
+                    <Link href="/orders">
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Orders
+                    </Link>
                   </Button>
                   <Button asChild variant="outline" className="w-full justify-start">
-                    <Link href="/menu-templates">Browse Menu Templates</Link>
+                    <Link href="/menu-templates">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Browse Menu Templates
+                    </Link>
                   </Button>
                 </>
               )}
               {isAdmin && (
                 <>
                   <Button asChild className="w-full justify-start">
-                    <Link href="/admin/teams">Manage Teams</Link>
+                    <Link href="/admin/teams">
+                      <Users className="h-4 w-4 mr-2" />
+                      Manage Teams
+                    </Link>
                   </Button>
                   <Button asChild variant="outline" className="w-full justify-start">
-                    <Link href="/admin/menu-templates">Manage Menu Templates</Link>
+                    <Link href="/admin/menu-templates">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Manage Menu Templates
+                    </Link>
                   </Button>
                   <Button asChild variant="outline" className="w-full justify-start">
-                    <Link href="/admin/analytics">View Analytics</Link>
+                    <Link href="/admin/analytics">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      View Analytics
+                    </Link>
                   </Button>
                 </>
               )}
@@ -100,7 +213,7 @@ export default function DashboardPage() {
           {/* Recent Activity */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-title-large">Recent Activity</CardTitle>
+              <CardTitle className="text-lg">Recent Activity</CardTitle>
               <CardDescription>Latest orders and updates</CardDescription>
             </CardHeader>
             <CardContent>
@@ -118,19 +231,21 @@ export default function DashboardPage() {
           {/* Account Info */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-title-large">Account Information</CardTitle>
+              <CardTitle className="text-lg">Account Information</CardTitle>
               <CardDescription>Your profile and team details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-label-large text-muted-foreground">Role</p>
-                <p className="font-medium">
-                  {user.profile?.role === 'admin' ? 'Athletic Labs Admin' : 'Team Staff'}
-                </p>
+                <p className="text-sm text-muted-foreground">Role</p>
+                <div className="flex items-center gap-2">
+                  <Badge variant={user?.profile?.role === 'admin' ? 'default' : 'secondary'}>
+                    {user?.profile?.role === 'admin' ? 'Athletic Labs Admin' : 'Team Staff'}
+                  </Badge>
+                </div>
               </div>
-              {user.profile?.team_id && (
+              {user?.profile?.team_id && (
                 <div>
-                  <p className="text-label-large text-muted-foreground">Team</p>
+                  <p className="text-sm text-muted-foreground">Team</p>
                   <p className="font-medium">Team ID: {user.profile.team_id}</p>
                 </div>
               )}
@@ -144,7 +259,7 @@ export default function DashboardPage() {
         {/* Help Section */}
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle className="text-title-large">Need Help?</CardTitle>
+            <CardTitle className="text-lg">Need Help?</CardTitle>
             <CardDescription>Resources and support for Athletic Labs</CardDescription>
           </CardHeader>
           <CardContent>
@@ -161,7 +276,7 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }

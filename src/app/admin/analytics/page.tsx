@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,22 +44,6 @@ export default function AdminAnalyticsPage() {
   const [error, setError] = useState("");
   const [timeRange, setTimeRange] = useState("30");
   const router = useRouter();
-
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
-    if (!isAdmin) {
-      router.push("/dashboard");
-      return;
-    }
-
-    fetchAnalytics();
-  }, [user, authLoading, router, isAdmin, timeRange]);
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -177,49 +162,60 @@ export default function AdminAnalyticsPage() {
     }
   };
 
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    if (!isAdmin) {
+      router.push("/dashboard");
+      return;
+    }
+
+    fetchAnalytics();
+  }, [user, authLoading, router, isAdmin, timeRange, fetchAnalytics]);
+
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading analytics...</p>
+      <AuthenticatedLayout>
+        <div className="p-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading analytics...</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 
   if (!user || !isAdmin || !analytics) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <AuthenticatedLayout>
+      <div className="p-6">
+        <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-title-large text-primary">Analytics Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-3xl font-bold mb-2">Analytics Dashboard</h1>
+            <p className="text-muted-foreground">
               Platform performance and insights
             </p>
           </div>
-          <div className="flex gap-2 items-center">
-            <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">Last 7 days</SelectItem>
-                <SelectItem value="30">Last 30 days</SelectItem>
-                <SelectItem value="90">Last 90 days</SelectItem>
-                <SelectItem value="365">Last year</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
-          </div>
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+              <SelectItem value="365">Last year</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8">
         {error && (
           <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
             <p className="text-destructive">{error}</p>
@@ -423,7 +419,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }
