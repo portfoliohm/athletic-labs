@@ -185,9 +185,20 @@ export default function MenuTemplatesPage() {
                       View Details & Nutrition
                     </Link>
                   </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      // Add to cart functionality - open cart and show template
+                      setIsCartOpen(true);
+                      // TODO: Add template to cart state
+                    }}
+                  >
+                    Add to Cart
+                  </Button>
                   <Button asChild variant="outline" className="w-full">
                     <Link href={`/orders/new?template=${template.id}`}>
-                      Order This Template
+                      Quick Order
                     </Link>
                   </Button>
                 </div>

@@ -27,6 +27,7 @@ const navigationItems = [
   { id: "dashboard", label: "Dashboard", href: "/dashboard", icon: Home, roles: ["admin", "team_staff"] },
   { id: "new-order", label: "New Order", href: "/orders/new", icon: ShoppingCart, roles: ["admin", "team_staff"] },
   { id: "templates", label: "Menu Templates", href: "/menu-templates", icon: BookmarkPlus, roles: ["admin", "team_staff"] },
+  { id: "menu-items", label: "Individual Items", href: "/menu-items", icon: BookmarkPlus, roles: ["admin", "team_staff"] },
   { id: "calendar", label: "Team Calendar", href: "/calendar", icon: Calendar, roles: ["admin", "team_staff"] },
   { id: "orders", label: "Order History", href: "/orders", icon: History, roles: ["admin", "team_staff"] },
   { id: "notifications", label: "Notifications", href: "/notifications", icon: Bell, roles: ["admin", "team_staff"] },
@@ -34,7 +35,7 @@ const navigationItems = [
   { id: "analytics", label: "Reports & Analytics", href: "/admin/analytics", icon: BarChart3, roles: ["admin"] },
   { id: "delivery", label: "Delivery Tracking", href: "/delivery", icon: MapPin, roles: ["admin", "team_staff"] },
   { id: "support", label: "Help & Support", href: "/support", icon: HelpCircle, roles: ["admin", "team_staff"] },
-  { id: "settings", label: "Settings", href: "/settings", icon: Settings, roles: ["admin", "team_staff"] },
+  { id: "admin-templates", label: "Manage Templates", href: "/admin/menu-templates", icon: Settings, roles: ["admin"] },
 ];
 
 export function AppNavigation() {
