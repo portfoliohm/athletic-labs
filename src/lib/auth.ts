@@ -33,9 +33,6 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       .eq('id', user.id)
       .single();
 
-    console.log("getCurrentUser - user id:", user.id);
-    console.log("getCurrentUser - profile data:", profile);
-    console.log("getCurrentUser - profile error:", profileError);
 
     return {
       ...user,
