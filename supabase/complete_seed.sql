@@ -15,19 +15,19 @@ INSERT INTO teams (id, name, league, city, nutrition_profile, roster_size, budge
   ('550e8400-e29b-41d4-a716-446655440002', 'New York Yankees', 'MLB', 'New York', '{"protein": 25, "carbs": 50, "fats": 25}', 28, 20000.00),
   ('550e8400-e29b-41d4-a716-446655440003', 'Dallas Cowboys', 'NFL', 'Dallas', '{"protein": 30, "carbs": 40, "fats": 30}', 53, 35000.00);
 
--- Insert all 11 menu templates with exact pricing
+-- Insert all 11 menu templates with exact pricing (corrected to proper bundle prices)
 INSERT INTO menu_templates (id, name, description, cuisine_type, bundle_price, serves_count, is_active) VALUES
-  ('660e8400-e29b-41d4-a716-446655440001', 'BYO MED BOWL', 'Build Your Own Mediterranean Bowl with fresh ingredients', 'Mediterranean', 29.40, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440002', 'BYO BURRITO BOWL', 'Build Your Own Burrito Bowl with Mexican flavors', 'Mexican', 24.00, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440003', 'BYO ASIAN BOWL', 'Build Your Own Asian Bowl with authentic Asian ingredients', 'Asian', 26.00, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440004', 'BYO PASTA BOWL', 'Build Your Own Pasta Bowl with Italian classics', 'Italian', 22.00, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440005', 'TASTE OF MIAMI', 'Authentic Miami flavors with Latin cuisine', 'Latin', 28.40, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440006', 'LITTLE ITALY', 'Classic Italian dishes with premium ingredients', 'Italian', 32.00, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440007', 'THE CHOPHOUSE', 'Premium steakhouse experience', 'American', 38.00, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440008', 'CHEF ADAM EXPERIENCE', 'Signature dishes from Chef Adam', 'Premium', 45.90, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440009', 'BREAKFAST ESSENTIALS', 'Essential breakfast items for teams', 'Breakfast', 18.00, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440010', 'BREAKFAST SPECIALS GO-TO BRUNCH', 'Special brunch items for weekend meals', 'Breakfast', 22.00, 60, true),
-  ('660e8400-e29b-41d4-a716-446655440011', 'BREAKFAST MENU (Specials)', 'Premium breakfast specialties', 'Breakfast', 24.00, 60, true);
+  ('660e8400-e29b-41d4-a716-446655440001', 'BYO MED BOWL', 'Build Your Own Mediterranean Bowl with fresh ingredients', 'Mediterranean', 49.00, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440002', 'BYO BURRITO BOWL', 'Build Your Own Burrito Bowl with Mexican flavors', 'Mexican', 40.00, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440003', 'BYO ASIAN BOWL', 'Build Your Own Asian Bowl with authentic Asian ingredients', 'Asian', 43.33, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440004', 'BYO PASTA BOWL', 'Build Your Own Pasta Bowl with Italian classics', 'Italian', 36.67, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440005', 'TASTE OF MIAMI', 'Authentic Miami flavors with Latin cuisine', 'Latin', 47.33, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440006', 'LITTLE ITALY', 'Classic Italian dishes with premium ingredients', 'Italian', 53.33, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440007', 'THE CHOPHOUSE', 'Premium steakhouse experience', 'American', 63.33, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440008', 'CHEF ADAM EXPERIENCE', 'Signature dishes from Chef Adam', 'Premium', 76.50, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440009', 'BREAKFAST ESSENTIALS', 'Essential breakfast items for teams', 'Breakfast', 30.00, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440010', 'BREAKFAST SPECIALS GO-TO BRUNCH', 'Special brunch items for weekend meals', 'Breakfast', 36.67, 60, true),
+  ('660e8400-e29b-41d4-a716-446655440011', 'BREAKFAST MENU (Specials)', 'Premium breakfast specialties', 'Breakfast', 40.00, 60, true);
 
 -- Insert all individual menu items with proper pricing
 
