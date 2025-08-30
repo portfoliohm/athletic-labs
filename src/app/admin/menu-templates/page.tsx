@@ -106,8 +106,8 @@ export default function AdminMenuTemplatesPage() {
         acc[templateId].total_orders += 1;
         acc[templateId].total_revenue += item.total_price;
         
-        if (!acc[templateId].last_ordered || item.orders.created_at > acc[templateId].last_ordered) {
-          acc[templateId].last_ordered = item.orders.created_at;
+        if (!acc[templateId].last_ordered || (item as any).orders.created_at > acc[templateId].last_ordered) {
+          acc[templateId].last_ordered = (item as any).orders.created_at;
         }
         
         return acc;
