@@ -86,7 +86,7 @@ export default function AdminAnalyticsPage() {
           template_id,
           total_price,
           orders!inner(created_at, status),
-          menu_templates(name)
+          menu_templates!inner(name)
         `)
         .gte('orders.created_at', startDate.toISOString())
         .eq('orders.status', 'delivered');
@@ -119,7 +119,7 @@ export default function AdminAnalyticsPage() {
         if (!acc[templateId]) {
           acc[templateId] = {
             id: templateId,
-            name: item.menu_templates?.name || 'Unknown',
+            name: (item as { menu_templates?: { name?: string } }).menu_templates?.name || 'Unknown',
             orders: 0,
             revenue: 0
           };
