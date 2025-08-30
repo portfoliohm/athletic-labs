@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 interface MenuTemplate {
   id: string;
@@ -35,7 +36,7 @@ interface OrderFormData {
   specialInstructions: string;
 }
 
-export default function NewOrderPage() {
+function NewOrderPageContent() {
   const { user, loading: authLoading, teamId } = useAuth();
   const [templates, setTemplates] = useState<MenuTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<MenuTemplate | null>(null);
@@ -485,5 +486,18 @@ export default function NewOrderPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function NewOrderPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    </div>}>
+      <NewOrderPageContent />
+    </Suspense>
   );
 }
