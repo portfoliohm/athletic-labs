@@ -41,12 +41,43 @@ export default function DashboardPage() {
 
   const fetchDashboardStats = async () => {
     try {
-      // Simplified stats for now - just set defaults
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+
+      // Fetch active orders
+      const { data: activeOrdersData } = await supabase
+        .from('orders')
+        .select('id')
+        .in('status', ['pending', 'confirmed', 'preparing']);
+
+      // Fetch monthly spend
+      const { data: monthlySpendData } = await supabase
+        .from('orders')
+        .select('total_amount')
+        .gte('created_at', `${currentMonth}-01`)
+        .eq('status', 'delivered');
+
+      // Fetch team count (admin only)
+      let totalTeams = 0;
+      if (isAdmin) {
+        const { data: teamsData } = await supabase
+          .from('teams')
+          .select('id');
+        totalTeams = teamsData?.length || 0;
+      }
+
+      // Fetch recent orders count
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const { data: recentOrdersData } = await supabase
+        .from('orders')
+        .select('id')
+        .gte('created_at', oneWeekAgo.toISOString());
+
       setStats({
-        activeOrders: 0,
-        monthlySpend: 0,
-        totalTeams: 0,
-        recentOrdersCount: 0
+        activeOrders: activeOrdersData?.length || 0,
+        monthlySpend: monthlySpendData?.reduce((sum, order) => sum + order.total_amount, 0) || 0,
+        totalTeams,
+        recentOrdersCount: recentOrdersData?.length || 0
       });
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);

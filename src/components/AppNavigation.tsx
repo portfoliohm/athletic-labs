@@ -53,8 +53,11 @@ export function AppNavigation() {
     }
   };
 
-  // Temporarily show all navigation items to debug
-  const filteredItems = navigationItems;
+  const filteredItems = navigationItems.filter(item => {
+    if (isAdmin) return item.roles.includes("admin");
+    if (isTeamStaff) return item.roles.includes("team_staff");
+    return false;
+  });
 
   const NavItem = ({ item, mobile = false }: { item: typeof navigationItems[0], mobile?: boolean }) => {
     const isActive = pathname === item.href;
