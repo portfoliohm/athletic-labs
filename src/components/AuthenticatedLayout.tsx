@@ -19,6 +19,9 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
     }
   }, [user, loading, router]);
 
+  // Debug: Add visible indicator
+  console.log("AuthenticatedLayout - user:", user, "loading:", loading);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -36,6 +39,11 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Debug indicator */}
+      <div className="fixed top-0 right-0 bg-red-500 text-white p-2 z-50 text-xs">
+        AuthLayout: {user ? 'LOGGED IN' : 'NO USER'} | Role: {user?.profile?.role || 'NONE'}
+      </div>
+      
       <AppNavigation />
       
       {/* Main Content */}

@@ -82,6 +82,11 @@ export function AppNavigation() {
 
   return (
     <>
+      {/* Debug indicator for navigation */}
+      <div className="fixed top-12 right-0 bg-blue-500 text-white p-2 z-50 text-xs">
+        Nav: {filteredItems.length} items | Admin: {isAdmin ? 'YES' : 'NO'} | Staff: {isTeamStaff ? 'YES' : 'NO'}
+      </div>
+      
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:bg-card">
         <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
